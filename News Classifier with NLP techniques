@@ -1,0 +1,56 @@
+import requests
+from bs4 import BeautifulSoup
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report
+
+# Web Scraping
+def scrape_news(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    articles = soup.find_all('article')  # Adjust based on the HTML structure of the website
+    return [article.get_text() for article in articles]
+
+# Data Cleaning
+def clean_data(data):
+    # Implement data cleaning steps here (remove HTML tags, duplicates, etc.)
+    return cleaned_data
+
+# Sample URLs for different news categories
+politics_url = 'https://example.com/politics'
+sports_url = 'https://example.com/sports'
+
+# Scraping and cleaning data
+politics_data = clean_data(scrape_news(politics_url))
+sports_data = clean_data(scrape_news(sports_url))
+
+# Creating labels
+politics_labels = ['politics'] * len(politics_data)
+sports_labels = ['sports'] * len(sports_data)
+
+# Combining data and labels
+all_data = politics_data + sports_data
+all_labels = politics_labels + sports_labels
+
+# Splitting the dataset
+X_train, X_test, y_train, y_test = train_test_split(all_data, all_labels, test_size=0.2, random_state=42)
+
+# Text vectorization
+vectorizer = TfidfVectorizer()
+X_train_tfidf = vectorizer.fit_transform(X_train)
+X_test_tfidf = vectorizer.transform(X_test)
+
+# Model training
+classifier = MultinomialNB()
+classifier.fit(X_train_tfidf, y_train)
+
+# Prediction
+y_pred = classifier.predict(X_test_tfidf)
+
+# Evaluation
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+
+print(f'Accuracy: {accuracy:.2f}')
+print('Classification Report:\n', report)
